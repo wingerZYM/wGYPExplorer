@@ -98,9 +98,6 @@
     </ResourceCompile>
   </ItemDefinitionGroup>
   <ItemGroup>
-    <Text Include="ReadMe.txt" />
-  </ItemGroup>
-  <ItemGroup>
     <ClInclude Include="gyp.h" />
     <ClInclude Include="LeftView.h" />
     <ClInclude Include="MainFrm.h" />

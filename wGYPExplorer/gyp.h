@@ -754,8 +754,6 @@ namespace gyp {
 		bool match(Location pattern,
 			int patternLength);
 		bool readComment();
-		bool readCStyleComment();
-		bool readCppStyleComment();
 		bool readString();
 		void readNumber();
 		bool readValue();

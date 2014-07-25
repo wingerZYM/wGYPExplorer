@@ -64,7 +64,10 @@ void CwGYPExplorerDoc::Serialize(CArchive& ar)
 		}
 		else
 		{
-			::AfxMessageBox(_T("非法的gyp文件！"));
+			CString strMessage("读取gyp文件错误：");
+
+			strMessage += reader.getFormatedErrorMessages().c_str();
+			::AfxMessageBox(strMessage);
 		}
 
 		delete[] pBuff;

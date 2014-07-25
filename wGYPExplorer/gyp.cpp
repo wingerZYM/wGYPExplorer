@@ -242,7 +242,7 @@ Value::CommentInfo::setComment(const char *text)
 	if (comment_)
 		valueAllocator()->releaseStringValue(comment_);
 	GYP_ASSERT(text);
-	GYP_ASSERT_MESSAGE(text[0] == '\0' || text[0] == '/', "Comments must start with /");
+	GYP_ASSERT_MESSAGE(text[0] == '\0' || text[0] == '#', "Comments must start with #");
 	// It seems that /**/ style comments are acceptable as well.
 	comment_ = valueAllocator()->duplicateStringValue(text);
 }
@@ -1665,11 +1665,11 @@ Reader::readToken(Token &token)
 	case ']':
 		token.type_ = tokenArrayEnd;
 		break;
-	case '"':
+	case '\'':
 		token.type_ = tokenString;
 		ok = readString();
 		break;
-	case '/':
+	case '#':
 		token.type_ = tokenComment;
 		ok = readComment();
 		break;
@@ -1699,8 +1699,45 @@ Reader::readToken(Token &token)
 		token.type_ = tokenNull;
 		ok = match("ull", 3);
 		break;
-	case ',':
-		token.type_ = tokenArraySeparator;
+	case ',':// 需要判断后面一个是否结束符
+		skipSpaces();// 跳过空格
+		switch (*current_)
+		{
+		case '}':
+			token.type_ = tokenObjectEnd;
+			token.start_ = current_++;
+			break;
+		case ']':
+			token.type_ = tokenArrayEnd;
+			token.start_ = current_++;
+			break;
+		case '#':// 注释真蛋疼……
+			do
+			{
+				++current_;
+				ok = readComment();
+				skipSpaces();
+			} while (ok && *current_ == '#');
+
+			switch (*current_)
+			{
+			case '}':
+				token.type_ = tokenObjectEnd;
+				token.start_ = current_++;
+				break;
+			case ']':
+				token.type_ = tokenArrayEnd;
+				token.start_ = current_++;
+				break;
+			default:
+				token.type_ = tokenArraySeparator;
+				break;
+			}
+			break;
+		default:
+			token.type_ = tokenArraySeparator;
+			break;
+		}
 		break;
 	case ':':
 		token.type_ = tokenMemberSeparator;
@@ -1749,21 +1786,20 @@ bool
 Reader::readComment()
 {
 	Location commentBegin = current_ - 1;
-	Char c = getNextChar();
-	bool successful = false;
-	if (c == '*')
-		successful = readCStyleComment();
-	else if (c == '/')
-		successful = readCppStyleComment();
-	if (!successful)
-		return false;
+
+	while (current_ != end_)
+	{
+		Char c = getNextChar();
+		if (c == '\r' || c == '\n')
+			break;
+	}
 
 	if (collectComments_)
 	{
 		CommentPlacement placement = commentBefore;
 		if (lastValueEnd_  &&  !containsNewLine(lastValueEnd_, commentBegin))
 		{
-			if (c != '*' || !containsNewLine(commentBegin, current_))
+			if (!containsNewLine(commentBegin, current_))
 				placement = commentAfterOnSameLine;
 		}
 
@@ -1791,30 +1827,6 @@ CommentPlacement placement)
 	}
 }
 
-bool
-Reader::readCStyleComment()
-{
-	while (current_ != end_)
-	{
-		Char c = getNextChar();
-		if (c == '*'  &&  *current_ == '/')
-			break;
-	}
-	return getNextChar() == '/';
-}
-
-bool
-Reader::readCppStyleComment()
-{
-	while (current_ != end_)
-	{
-		Char c = getNextChar();
-		if (c == '\r' || c == '\n')
-			break;
-	}
-	return true;
-}
-
 void
 Reader::readNumber()
 {
@@ -1836,10 +1848,10 @@ Reader::readString()
 		c = getNextChar();
 		if (c == '\\')
 			getNextChar();
-		else if (c == '"')
+		else if (c == '\'')
 			break;
 	}
-	return c == '"';
+	return c == '\'';
 }
 
 bool
@@ -1855,7 +1867,7 @@ Reader::readObject(Token &tokenStart)
 			initialTokenOk = readToken(tokenName);
 		if (!initialTokenOk)
 			break;
-		if (tokenName.type_ == tokenObjectEnd  &&  name.empty())  // empty object
+		if (tokenName.type_ == tokenObjectEnd/*  &&  name.empty()*/)  // empty object
 			return true;
 		if (tokenName.type_ != tokenString)
 			break;
