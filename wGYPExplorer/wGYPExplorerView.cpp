@@ -54,6 +54,7 @@ void CwGYPExplorerView::OnInitialUpdate()
 
 	// TODO:  调用 GetListCtrl() 直接访问 ListView 的列表控件，
 	//  从而可以用项填充 ListView。
+	auto &listCtrl = GetListCtrl();
 }
 
 void CwGYPExplorerView::OnRButtonUp(UINT /* nFlags */, CPoint point)

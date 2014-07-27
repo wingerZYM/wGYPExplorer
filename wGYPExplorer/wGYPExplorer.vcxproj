@@ -123,6 +123,7 @@
     <ClCompile Include="wGYPExplorerView.cpp" />
   </ItemGroup>
   <ItemGroup>
+    <None Include="..\README.md" />
     <None Include="res\wGYPExplorer.rc2" />
     <None Include="wGYPExplorer.reg" />
   </ItemGroup>

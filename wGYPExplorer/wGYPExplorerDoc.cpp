@@ -46,6 +46,11 @@ void CwGYPExplorerDoc::Serialize(CArchive& ar)
 	if (ar.IsStoring())
 	{
 		// TODO:  在此添加存储代码
+		gyp::StyledWriter writer;
+
+		auto &strValue = writer.write(m_Root);
+
+		ar.Write(strValue.c_str(), strValue.length());
 	}
 	else
 	{

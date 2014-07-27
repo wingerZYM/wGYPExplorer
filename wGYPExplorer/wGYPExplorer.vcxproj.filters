@@ -77,6 +77,7 @@
     <None Include="res\wGYPExplorer.rc2">
       <Filter>资源文件</Filter>
     </None>
+    <None Include="..\README.md" />
   </ItemGroup>
   <ItemGroup>
     <ResourceCompile Include="wGYPExplorer.rc">

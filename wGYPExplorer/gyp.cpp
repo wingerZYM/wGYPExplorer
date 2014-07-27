@@ -1821,8 +1821,6 @@ CommentPlacement placement)
 	}
 	else
 	{
-		if (!commentsBefore_.empty())
-			commentsBefore_ += "\n";
 		commentsBefore_ += std::string(begin, end);
 	}
 }
@@ -2343,20 +2341,20 @@ std::string valueToQuotedString(const char *value)
 {
 	// Not sure how to handle unicode...
 	if (strpbrk(value, "\"\\\b\f\n\r\t") == NULL && !containsControlCharacter(value))
-		return std::string("\"") + value + "\"";
+		return std::string("'") + value + "'";
 	// We have to walk value and escape any special characters.
 	// Appending to std::string is not efficient, but this should be rare.
 	// (Note: forward slashes are *not* rare, but I am not escaping them.)
 	unsigned maxsize = strlen(value) * 2 + 3; // allescaped+quotes+NULL
 	std::string result;
 	result.reserve(maxsize); // to avoid lots of mallocs
-	result += "\"";
+	result += "'";
 	for (const char* c = value; *c != 0; ++c)
 	{
 		switch (*c)
 		{
-		case '\"':
-			result += "\\\"";
+		case '"':
+			result += "\"";
 			break;
 		case '\\':
 			result += "\\\\";
@@ -2398,7 +2396,7 @@ std::string valueToQuotedString(const char *value)
 			break;
 		}
 	}
-	result += "\"";
+	result += "'";
 	return result;
 }
 
@@ -2459,9 +2457,8 @@ FastWriter::writeValue(const Value &value)
 		int size = value.size();
 		for (int index = 0; index < size; ++index)
 		{
-			if (index > 0)
-				document_ += ",";
 			writeValue(value[index]);
+			document_ += ",";
 		}
 		document_ += "]";
 	}
@@ -2475,12 +2472,10 @@ FastWriter::writeValue(const Value &value)
 			++it)
 		{
 			const std::string &name = *it;
-			if (it != members.begin())
-				document_ += ",";
 			document_ += valueToQuotedString(name.c_str());
-			document_ += yamlCompatiblityEnabled_ ? ": "
-				: ":";
+			document_ += yamlCompatiblityEnabled_ ? ": " : ":";
 			writeValue(value[name]);
+			document_ += ",";
 		}
 		document_ += "}";
 	}
@@ -2544,8 +2539,7 @@ StyledWriter::writeValue(const Value &value)
 		{
 			writeWithIndent("{");
 			indent();
-			Value::Members::iterator it = members.begin();
-			while (true)
+			for (Value::Members::iterator it = members.begin(); it != members.end(); ++it)
 			{
 				const std::string &name = *it;
 				const Value &childValue = value[name];
@@ -2553,11 +2547,6 @@ StyledWriter::writeValue(const Value &value)
 				writeWithIndent(valueToQuotedString(name.c_str()));
 				document_ += " : ";
 				writeValue(childValue);
-				if (++it == members.end())
-				{
-					writeCommentAfterValueOnSameLine(childValue);
-					break;
-				}
 				document_ += ",";
 				writeCommentAfterValueOnSameLine(childValue);
 			}
@@ -2583,8 +2572,7 @@ StyledWriter::writeArrayValue(const Value &value)
 			writeWithIndent("[");
 			indent();
 			bool hasChildValue = !childValues_.empty();
-			unsigned index = 0;
-			while (true)
+			for (unsigned index = 0; index < size; ++index)
 			{
 				const Value &childValue = value[index];
 				writeCommentBeforeValue(childValue);
@@ -2595,12 +2583,7 @@ StyledWriter::writeArrayValue(const Value &value)
 					writeIndent();
 					writeValue(childValue);
 				}
-				if (++index == size)
-				{
-					writeCommentAfterValueOnSameLine(childValue);
-					break;
-				}
-				document_ += ",";
+				document_ += ",\n";
 				writeCommentAfterValueOnSameLine(childValue);
 			}
 			unindent();
@@ -2612,9 +2595,8 @@ StyledWriter::writeArrayValue(const Value &value)
 			document_ += "[ ";
 			for (unsigned index = 0; index < size; ++index)
 			{
-				if (index > 0)
-					document_ += ", ";
 				document_ += childValues_[index];
+				document_ += ", ";
 			}
 			document_ += " ]";
 		}
@@ -2625,7 +2607,7 @@ bool
 StyledWriter::isMultineArray(const Value &value)
 {
 	int size = value.size();
-	bool isMultiLine = size * 3 >= rightMargin_;
+	bool isMultiLine = size >= 2;
 	childValues_.clear();
 	for (int index = 0; index < size && !isMultiLine; ++index)
 	{
@@ -2699,8 +2681,8 @@ StyledWriter::writeCommentBeforeValue(const Value &root)
 {
 	if (!root.hasComment(commentBefore))
 		return;
+	writeIndent();
 	document_ += normalizeEOL(root.getComment(commentBefore));
-	document_ += "\n";
 }
 
 void
