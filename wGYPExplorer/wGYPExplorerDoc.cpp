@@ -40,7 +40,6 @@ CwGYPExplorerDoc::~CwGYPExplorerDoc()
 
 
 // CwGYPExplorerDoc –Ú¡–ªØ
-
 void CwGYPExplorerDoc::Serialize(CArchive& ar)
 {
 	if (ar.IsStoring())

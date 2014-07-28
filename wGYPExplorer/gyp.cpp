@@ -2596,7 +2596,7 @@ StyledWriter::writeArrayValue(const Value &value)
 			for (unsigned index = 0; index < size; ++index)
 			{
 				document_ += childValues_[index];
-				document_ += ", ";
+				document_ += ",";
 			}
 			document_ += " ]";
 		}
@@ -2722,7 +2722,11 @@ StyledWriter::normalizeEOL(const std::string &text)
 		{
 			if (*current == '\n') // convert dos EOL
 				++current;
-			normalized += '\n';
+			normalized += '\n' + indentString_;
+		}
+		else if (c == '\n')
+		{
+			normalized += '\n' + indentString_;
 		}
 		else // handle unix EOL & other char
 			normalized += c;
@@ -2787,8 +2791,7 @@ StyledStreamWriter::writeValue(const Value &value)
 		{
 			writeWithIndent("{");
 			indent();
-			Value::Members::iterator it = members.begin();
-			while (true)
+			for (Value::Members::iterator it = members.begin(); it != members.end(); ++it)
 			{
 				const std::string &name = *it;
 				const Value &childValue = value[name];
@@ -2796,11 +2799,6 @@ StyledStreamWriter::writeValue(const Value &value)
 				writeWithIndent(valueToQuotedString(name.c_str()));
 				*document_ << " : ";
 				writeValue(childValue);
-				if (++it == members.end())
-				{
-					writeCommentAfterValueOnSameLine(childValue);
-					break;
-				}
 				*document_ << ",";
 				writeCommentAfterValueOnSameLine(childValue);
 			}
@@ -2826,8 +2824,7 @@ StyledStreamWriter::writeArrayValue(const Value &value)
 			writeWithIndent("[");
 			indent();
 			bool hasChildValue = !childValues_.empty();
-			unsigned index = 0;
-			while (true)
+			for (unsigned index = 0; index < size; ++index)
 			{
 				const Value &childValue = value[index];
 				writeCommentBeforeValue(childValue);
@@ -2838,12 +2835,7 @@ StyledStreamWriter::writeArrayValue(const Value &value)
 					writeIndent();
 					writeValue(childValue);
 				}
-				if (++index == size)
-				{
-					writeCommentAfterValueOnSameLine(childValue);
-					break;
-				}
-				*document_ << ",";
+				*document_ << ",\n";
 				writeCommentAfterValueOnSameLine(childValue);
 			}
 			unindent();
@@ -2855,9 +2847,8 @@ StyledStreamWriter::writeArrayValue(const Value &value)
 			*document_ << "[ ";
 			for (unsigned index = 0; index < size; ++index)
 			{
-				if (index > 0)
-					*document_ << ", ";
 				*document_ << childValues_[index];
+				*document_ << ",";
 			}
 			*document_ << " ]";
 		}
@@ -2868,7 +2859,7 @@ bool
 StyledStreamWriter::isMultineArray(const Value &value)
 {
 	int size = value.size();
-	bool isMultiLine = size * 3 >= rightMargin_;
+	bool isMultiLine = size >= 2;
 	childValues_.clear();
 	for (int index = 0; index < size && !isMultiLine; ++index)
 	{
@@ -2934,8 +2925,8 @@ StyledStreamWriter::writeCommentBeforeValue(const Value &root)
 {
 	if (!root.hasComment(commentBefore))
 		return;
+	writeIndent();
 	*document_ << normalizeEOL(root.getComment(commentBefore));
-	*document_ << "\n";
 }
 
 void
@@ -2975,7 +2966,11 @@ StyledStreamWriter::normalizeEOL(const std::string &text)
 		{
 			if (*current == '\n') // convert dos EOL
 				++current;
-			normalized += '\n';
+			normalized += '\n' + indentString_;
+		}
+		else if (c == '\n')
+		{
+			normalized += '\n' + indentString_;
 		}
 		else // handle unix EOL & other char
 			normalized += c;

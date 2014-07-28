@@ -857,7 +857,7 @@ namespace gyp {
 		void writeCommentBeforeValue(const Value &root);
 		void writeCommentAfterValueOnSameLine(const Value &root);
 		bool hasCommentForValue(const Value &value);
-		static std::string normalizeEOL(const std::string &text);
+		std::string normalizeEOL(const std::string &text);
 
 		typedef std::vector<std::string> ChildValues;
 
@@ -895,7 +895,7 @@ namespace gyp {
 		void writeCommentBeforeValue(const Value &root);
 		void writeCommentAfterValueOnSameLine(const Value &root);
 		bool hasCommentForValue(const Value &value);
-		static std::string normalizeEOL(const std::string &text);
+		std::string normalizeEOL(const std::string &text);
 
 		typedef std::vector<std::string> ChildValues;
 

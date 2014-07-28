@@ -46,6 +46,8 @@ void CLeftView::OnInitialUpdate()
 	// TODO:  调用 GetTreeCtrl() 直接访问 TreeView 的树控件，
 	//  从而可以用项填充 TreeView。
 	auto &treeCtral = GetTreeCtrl();
+
+	TRACE("tree is init update!\n");
 }
 
 
