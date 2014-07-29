@@ -268,15 +268,15 @@ VS_VERSION_INFO VERSIONINFO
 BEGIN
     BLOCK "StringFileInfo"
     BEGIN
-        BLOCK "080404B0"
+        BLOCK "080404b0"
         BEGIN
-            VALUE "CompanyName", "TODO:  <公司名>"
+            VALUE "CompanyName", "winger"
             VALUE "FileDescription", "wGYPExplorer"
             VALUE "FileVersion", "1.0.0.1"
             VALUE "InternalName", "wGYPExplorer.exe"
-            VALUE "LegalCopyright", "TODO:  (C) <公司名>。  保留所有权利。"
+            VALUE "LegalCopyright", "作者：winger。  保留所有权利。"
             VALUE "OriginalFilename", "wGYPExplorer.exe"
-            VALUE "ProductName", "TODO:  <产品名>"
+            VALUE "ProductName", "GYP浏览器"
             VALUE "ProductVersion", "1.0.0.1"
         END
     END
@@ -432,6 +432,7 @@ BEGIN
     IDS_STATUS_PANE2        "窗格 2"
     IDS_TOOLBAR_STANDARD    "标准"
     IDS_TOOLBAR_CUSTOMIZE   "自定义..."
+    IDS_FILE_DEFAULT        "# new gpy file create by wGYPExplorer\n{'target_defaults':{'conditions':[['OS==""linux""',{'cflags':['-Wall',],'defines':['__unix__','_LINUX',],},],['OS==""win""',{'defines':['WIN32',],'msvs_configuration_attributes':{'CharacterSet':'1',},'msvs_settings':{'VCCLCompilerTool':{'Detect64BitPortabilityProblems':'true','WarningLevel':'4',},},},],['OS==""mac""',{'cflags':['-Wall',],'defines':['__unix__','_MACOS',],},],],'configurations':{'Debug':{'conditions':[['OS==""linux"" or OS==""freebsd"" or OS==""openbsd""',{'cflags':['-g',],},],['OS==""win""',{'msvs_settings':{'VCCLCompilerTool':{'BasicRuntimeChecks':'3','DebugInformationFormat':'4','MinimalRebuild':'true','Optimization':'0','conditions':[['library==""shared_library""',{'RuntimeLibrary':'3',},{'RuntimeLibrary':'1',},],],},'VCLinkerTool':{'GenerateDebugInformation':'true','LinkIncremental':'2',},},},],['OS==""mac""',{'xcode_settings':{'GCC_GENERATE_DEBUGGING_SYMBOLS':'YES',},},],],'defines':['_DEBUG',],},'Release':{'conditions':[['OS==""linux"" or OS==""freebsd"" or OS==""openbsd""',{'cflags':['-O3',],},],['OS==""win""',{'msvs_settings':{'VCCLCompilerTool':{'Optimization':'2','conditions':[['library==""shared_library""',{'RuntimeLibrary':'2',},{'RuntimeLibrary':'0',},],],},},},],['OS==""mac""',{'xcode_settings':{'GCC_GENERATE_DEBUGGING_SYMBOLS':'NO','GCC_OPTIMIZATION_LEVEL':'3','GCC_STRICT_ALIASING':'YES',},},],],},},},'targets':[{'conditions':[['OS==""linux"" or OS==""freebsd"" or OS==""openbsd""',{'ldflags':['-',],},],['OS==""win""',{'msvs_settings':{'VCLinkerTool':{'AdditionalDependencies':'','conditions':[['library==""static_library""',{'AdditionalLibraryDirectories':'$(OutDir)\\lib',},],],},},},],['OS==""mac""',{'link_settings':{'libraries':['',],},},],],'defines':[],'dependencies':[],'include_dirs':[],'sources':[],'target_name':'new_target','type':'(>>>POINT<<<)',},],}"
 END
 
 STRINGTABLE

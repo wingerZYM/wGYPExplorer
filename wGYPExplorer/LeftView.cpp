@@ -18,6 +18,7 @@
 IMPLEMENT_DYNCREATE(CLeftView, CTreeView)
 
 BEGIN_MESSAGE_MAP(CLeftView, CTreeView)
+//	ON_WM_CREATE()
 END_MESSAGE_MAP()
 
 
@@ -35,6 +36,7 @@ CLeftView::~CLeftView()
 BOOL CLeftView::PreCreateWindow(CREATESTRUCT& cs)
 {
 	// TODO:  在此处通过修改 CREATESTRUCT cs 来修改窗口类或样式
+	cs.style |= TVS_HASLINES | TVS_LINESATROOT | TVS_HASBUTTONS;
 
 	return CTreeView::PreCreateWindow(cs);
 }
@@ -43,11 +45,25 @@ void CLeftView::OnInitialUpdate()
 {
 	CTreeView::OnInitialUpdate();
 
+	TRACE("tree is init update!\n");
 	// TODO:  调用 GetTreeCtrl() 直接访问 TreeView 的树控件，
 	//  从而可以用项填充 TreeView。
-	auto &treeCtral = GetTreeCtrl();
+	auto pDoc = GetDocument();
+	const auto &root = *pDoc->GetRoot();
 
-	TRACE("tree is init update!\n");
+	if (root.empty()) return;
+
+	auto &treeCtrl = GetTreeCtrl();
+
+	treeCtrl.DeleteAllItems();
+
+	HTREEITEM hItem;
+	if (pDoc->IsGypi())
+		hItem = treeCtrl.InsertItem(_T("GYPI文件"));
+	else
+		hItem = treeCtrl.InsertItem(_T("GYP文件"));
+
+	insertItem(treeCtrl, hItem, root);
 }
 
 
@@ -73,3 +89,15 @@ CwGYPExplorerDoc* CLeftView::GetDocument() // 非调试版本是内联的
 
 
 // CLeftView 消息处理程序
+void CLeftView::insertItem(CTreeCtrl& treeCtrl, HTREEITEM hParent, const gyp::Value& value)
+{
+	for (auto iter = value.begin(); iter != value.end(); ++iter)
+	{
+		CString strName(iter.memberName());
+
+		if (strName.IsEmpty()) continue;
+		auto hItem = treeCtrl.InsertItem(strName, hParent);
+
+		insertItem(treeCtrl, hItem, *iter);
+	}
+}

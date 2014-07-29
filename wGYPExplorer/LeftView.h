@@ -39,6 +39,8 @@ protected:
 // 生成的消息映射函数
 protected:
 	DECLARE_MESSAGE_MAP()
+private:
+	void insertItem(CTreeCtrl& treeCtrl, HTREEITEM hParent, const gyp::Value& value);
 };
 
 #ifndef _DEBUG  // LeftView.cpp 中的调试版本

@@ -43,6 +43,7 @@ BOOL CwGYPExplorerView::PreCreateWindow(CREATESTRUCT& cs)
 {
 	// TODO:  在此处通过修改
 	//  CREATESTRUCT cs 来修改窗口类或样式
+//	cs.dwExStyle |= LVS_EX_FULLROWSELECT | LVS_EX_GRIDLINES;
 
 	return CListView::PreCreateWindow(cs);
 }
@@ -56,6 +57,7 @@ void CwGYPExplorerView::OnInitialUpdate()
 	//  从而可以用项填充 ListView。
 	auto &listCtrl = GetListCtrl();
 
+	listCtrl.SetExtendedStyle(listCtrl.GetExtendedStyle() | LVS_EX_FULLROWSELECT | LVS_EX_GRIDLINES);
 	TRACE("view is init update!\n");
 }
 

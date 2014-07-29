@@ -28,6 +28,8 @@ END_MESSAGE_MAP()
 // CwGYPExplorerDoc 构造/析构
 
 CwGYPExplorerDoc::CwGYPExplorerDoc()
+	: m_bIsGypi(false)
+	, m_bFirst(true)
 {
 	// TODO:  在此添加一次性构造代码
 
@@ -54,19 +56,19 @@ void CwGYPExplorerDoc::Serialize(CArchive& ar)
 	else
 	{
 		// TODO:  在此添加加载代码
-		auto nLen = static_cast<UINT>(ar.GetFile()->GetLength());
+		auto pFile = ar.GetFile();
+		auto strFileName = pFile->GetFileName();
 
+		m_bIsGypi = strFileName.GetAt(strFileName.GetLength() - 1) == 'i';
+
+		auto nLen = static_cast<UINT>(pFile->GetLength());
 		char *pBuff = new char[nLen];
 
 		ar.Read(pBuff, nLen);
 
 		gyp::Reader reader;
 
-		if (reader.parse(pBuff, pBuff + nLen, m_Root))
-		{
-
-		}
-		else
+		if (!reader.parse(pBuff, pBuff + nLen, m_Root))
 		{
 			CString strMessage("读取gyp文件错误：");
 
@@ -148,3 +150,21 @@ void CwGYPExplorerDoc::Dump(CDumpContext& dc) const
 
 
 // CwGYPExplorerDoc 命令
+BOOL CwGYPExplorerDoc::OnNewDocument()
+{
+	// TODO:  在此添加专用代码和/或调用基类
+	if (m_bFirst)
+	{
+		m_bFirst = false;
+	}
+	else
+	{
+		CStringA strDefault;
+		strDefault.LoadString(IDS_FILE_DEFAULT);
+
+		gyp::Reader reader;
+		reader.parse(strDefault.GetString(), strDefault.GetString() + strDefault.GetLength(), m_Root);
+	}
+
+	return CDocument::OnNewDocument();
+}

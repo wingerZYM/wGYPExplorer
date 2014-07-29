@@ -23,6 +23,7 @@ public:
 // 重写
 public:
 	virtual void Serialize(CArchive& ar);
+	virtual BOOL OnNewDocument();
 #ifdef SHARED_HANDLERS
 	virtual void InitializeSearchContent();
 	virtual void OnDrawThumbnail(CDC& dc, LPRECT lprcBounds);
@@ -31,6 +32,9 @@ public:
 // 实现
 public:
 	virtual ~CwGYPExplorerDoc();
+
+	gyp::Value *GetRoot() { return &m_Root; }
+	bool IsGypi() const { return m_bIsGypi; }
 #ifdef _DEBUG
 	virtual void AssertValid() const;
 	virtual void Dump(CDumpContext& dc) const;
@@ -38,6 +42,8 @@ public:
 
 // 数据
 private:
+	bool m_bFirst;
+	bool m_bIsGypi;
 	gyp::Value m_Root;
 
 // 生成的消息映射函数

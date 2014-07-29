@@ -2029,12 +2029,12 @@ bool
 Reader::decodeString(Token &token, std::string &decoded)
 {
 	decoded.reserve(token.end_ - token.start_ - 2);
-	Location current = token.start_ + 1; // skip '"'
-	Location end = token.end_ - 1;      // do not include '"'
+	Location current = token.start_ + 1; // skip '\''
+	Location end = token.end_ - 1;      // do not include '\''
 	while (current != end)
 	{
 		Char c = *current++;
-		if (c == '"')
+		if (c == '\'')
 			break;
 		else if (c == '\\')
 		{
