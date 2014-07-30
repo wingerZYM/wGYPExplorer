@@ -40,7 +40,10 @@ protected:
 protected:
 	DECLARE_MESSAGE_MAP()
 private:
-	void insertItem(CTreeCtrl& treeCtrl, HTREEITEM hParent, const gyp::Value& value);
+	void insertItem(CTreeCtrl& treeCtrl, HTREEITEM hParent, gyp::Value& value);
+	void insertConditions(CTreeCtrl& treeCtrl, HTREEITEM hParent, gyp::Value& value);
+	void insertTargets(CTreeCtrl& treeCtrl, HTREEITEM hParent, gyp::Value& value);
+	void cutoverConditions(CString &strCond);// 切换条件
 };
 
 #ifndef _DEBUG  // LeftView.cpp 中的调试版本

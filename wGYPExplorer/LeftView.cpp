@@ -49,7 +49,7 @@ void CLeftView::OnInitialUpdate()
 	// TODO:  调用 GetTreeCtrl() 直接访问 TreeView 的树控件，
 	//  从而可以用项填充 TreeView。
 	auto pDoc = GetDocument();
-	const auto &root = *pDoc->GetRoot();
+	auto &root = *pDoc->GetRoot();
 
 	if (root.empty()) return;
 
@@ -57,13 +57,11 @@ void CLeftView::OnInitialUpdate()
 
 	treeCtrl.DeleteAllItems();
 
-	HTREEITEM hItem;
-	if (pDoc->IsGypi())
-		hItem = treeCtrl.InsertItem(_T("GYPI文件"));
-	else
-		hItem = treeCtrl.InsertItem(_T("GYP文件"));
+	auto hItem = treeCtrl.InsertItem(pDoc->GetFileName());
 
 	insertItem(treeCtrl, hItem, root);
+
+	treeCtrl.Expand(hItem, TVE_EXPAND);
 }
 
 
@@ -89,15 +87,121 @@ CwGYPExplorerDoc* CLeftView::GetDocument() // 非调试版本是内联的
 
 
 // CLeftView 消息处理程序
-void CLeftView::insertItem(CTreeCtrl& treeCtrl, HTREEITEM hParent, const gyp::Value& value)
+void CLeftView::insertItem(CTreeCtrl& treeCtrl, HTREEITEM hParent, gyp::Value& value)
 {
+	TVINSERTSTRUCT tvInsert;
+	ZeroMemory(&tvInsert, sizeof(TVINSERTSTRUCT));
+
+	tvInsert.hParent = hParent;
+	tvInsert.hInsertAfter = TVI_LAST;
+	tvInsert.item.mask = TVIF_TEXT | TVIF_PARAM;
+
 	for (auto iter = value.begin(); iter != value.end(); ++iter)
 	{
 		CString strName(iter.memberName());
 
 		if (strName.IsEmpty()) continue;
-		auto hItem = treeCtrl.InsertItem(strName, hParent);
 
-		insertItem(treeCtrl, hItem, *iter);
+		tvInsert.item.pszText = strName.GetBuffer();
+		tvInsert.item.lParam = reinterpret_cast<LPARAM>(&*iter);
+
+		auto hItem = treeCtrl.InsertItem(&tvInsert);
+
+		if (_T("includes") == strName) continue;
+
+		if (_T("conditions") == strName)
+			insertConditions(treeCtrl, hItem, *iter);
+		else if (_T("targets") == strName)
+			insertTargets(treeCtrl, hItem, *iter);
+		else
+			insertItem(treeCtrl, hItem, *iter);
 	}
+}
+
+void CLeftView::insertConditions(CTreeCtrl& treeCtrl, HTREEITEM hParent, gyp::Value& value)
+{
+	TVINSERTSTRUCT tvInsert;
+	ZeroMemory(&tvInsert, sizeof(TVINSERTSTRUCT));
+
+	tvInsert.hParent = hParent;
+	tvInsert.hInsertAfter = TVI_LAST;
+	tvInsert.item.mask = TVIF_TEXT | TVIF_PARAM;
+
+	for (auto iter = value.begin(); iter != value.end(); ++iter)
+	{
+		auto &node = *iter;
+		ASSERT(2 == node.size() || 3 == node.size());
+
+		auto &cond1 = node[static_cast<gyp::UInt>(1)];
+		CString strName(node[static_cast<gyp::UInt>(0)].asString().c_str());
+
+		tvInsert.item.pszText = strName.GetBuffer();
+		tvInsert.item.lParam = reinterpret_cast<LPARAM>(&cond1);
+
+		auto hItem = treeCtrl.InsertItem(&tvInsert);
+
+		insertItem(treeCtrl, hItem, cond1);
+
+		if (2 == node.size()) continue;// 是否是相反条件
+
+		// 相反条件
+		cutoverConditions(strName);
+		auto &cond2 = node[static_cast<gyp::UInt>(2)];
+
+		tvInsert.item.pszText = strName.GetBuffer();// 防止CString重新分配过内存。
+		tvInsert.item.lParam = reinterpret_cast<LPARAM>(&cond2);
+
+		hItem = treeCtrl.InsertItem(&tvInsert);
+
+		insertItem(treeCtrl, hItem, cond2);
+	}
+}
+
+void CLeftView::insertTargets(CTreeCtrl& treeCtrl, HTREEITEM hParent, gyp::Value& value)
+{
+	TVINSERTSTRUCT tvInsert;
+	ZeroMemory(&tvInsert, sizeof(TVINSERTSTRUCT));
+
+	tvInsert.hParent = hParent;
+	tvInsert.hInsertAfter = TVI_LAST;
+	tvInsert.item.mask = TVIF_TEXT | TVIF_PARAM;
+
+	for (auto iter = value.begin(); iter != value.end(); ++iter)
+	{
+		CString strName(iter.memberName());
+
+		tvInsert.item.pszText = strName.GetBuffer();
+		tvInsert.item.lParam = reinterpret_cast<LPARAM>(&*iter);
+
+		auto hItem = treeCtrl.InsertItem(&tvInsert);
+	}
+}
+
+void CLeftView::cutoverConditions(CString &strCond)
+{
+	auto pStr = strCond.GetBuffer();
+
+	auto c = pStr + strCond.GetLength() - 1;
+	if ('1' == *c)
+	{
+		*c = '0';
+	}
+	else if ('0' == *c)
+	{
+		*c = '1';
+	}
+	else
+	{
+		int nFind;
+		if (-1 != (nFind = strCond.Find('!')))
+		{
+			pStr[nFind] = '=';
+		}
+		else if (-1 != (nFind = strCond.Find('=')))
+		{
+			pStr[nFind] = '!';
+		}
+	}
+
+	strCond.ReleaseBuffer();
 }

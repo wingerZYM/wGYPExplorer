@@ -28,8 +28,7 @@ END_MESSAGE_MAP()
 // CwGYPExplorerDoc 构造/析构
 
 CwGYPExplorerDoc::CwGYPExplorerDoc()
-	: m_bIsGypi(false)
-	, m_bFirst(true)
+	: m_bFirst(true)
 {
 	// TODO:  在此添加一次性构造代码
 
@@ -57,9 +56,7 @@ void CwGYPExplorerDoc::Serialize(CArchive& ar)
 	{
 		// TODO:  在此添加加载代码
 		auto pFile = ar.GetFile();
-		auto strFileName = pFile->GetFileName();
-
-		m_bIsGypi = strFileName.GetAt(strFileName.GetLength() - 1) == 'i';
+		m_strFileName = pFile->GetFileName();
 
 		auto nLen = static_cast<UINT>(pFile->GetLength());
 		char *pBuff = new char[nLen];

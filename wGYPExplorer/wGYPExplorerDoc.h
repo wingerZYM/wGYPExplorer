@@ -34,7 +34,7 @@ public:
 	virtual ~CwGYPExplorerDoc();
 
 	gyp::Value *GetRoot() { return &m_Root; }
-	bool IsGypi() const { return m_bIsGypi; }
+	const CString& GetFileName() const { return m_strFileName; }
 #ifdef _DEBUG
 	virtual void AssertValid() const;
 	virtual void Dump(CDumpContext& dc) const;
@@ -43,7 +43,7 @@ public:
 // 数据
 private:
 	bool m_bFirst;
-	bool m_bIsGypi;
+	CString m_strFileName;
 	gyp::Value m_Root;
 
 // 生成的消息映射函数
