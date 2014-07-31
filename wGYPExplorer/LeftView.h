@@ -5,6 +5,11 @@
 
 #pragma once
 
+namespace gyp
+{
+class Value;
+}
+
 class CwGYPExplorerDoc;
 
 class CLeftView : public CTreeView
@@ -44,6 +49,8 @@ private:
 	void insertConditions(CTreeCtrl& treeCtrl, HTREEITEM hParent, gyp::Value& value);
 	void insertTargets(CTreeCtrl& treeCtrl, HTREEITEM hParent, gyp::Value& value);
 	void cutoverConditions(CString &strCond);// 切换条件
+
+	afx_msg void OnTvnSelchanged(NMHDR *pNMHDR, LRESULT *pResult);
 };
 
 #ifndef _DEBUG  // LeftView.cpp 中的调试版本

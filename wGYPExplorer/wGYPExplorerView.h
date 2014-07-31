@@ -4,6 +4,10 @@
 
 #pragma once
 
+namespace gyp
+{
+class Value;
+}
 
 class CwGYPExplorerView : public CListView
 {
@@ -17,6 +21,7 @@ public:
 
 // 操作
 public:
+	void UpdateList(gyp::Value *pValue);
 
 // 重写
 public:
@@ -33,6 +38,7 @@ public:
 #endif
 
 protected:
+	gyp::Value *m_pValue;
 
 // 生成的消息映射函数
 protected:

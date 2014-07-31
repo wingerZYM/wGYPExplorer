@@ -30,6 +30,7 @@ END_MESSAGE_MAP()
 // CwGYPExplorerView 构造/析构
 
 CwGYPExplorerView::CwGYPExplorerView()
+	: m_pValue(nullptr)
 {
 	// TODO:  在此处添加构造代码
 
@@ -44,6 +45,7 @@ BOOL CwGYPExplorerView::PreCreateWindow(CREATESTRUCT& cs)
 	// TODO:  在此处通过修改
 	//  CREATESTRUCT cs 来修改窗口类或样式
 //	cs.dwExStyle |= LVS_EX_FULLROWSELECT | LVS_EX_GRIDLINES;
+	cs.style |= LVS_REPORT;
 
 	return CListView::PreCreateWindow(cs);
 }
@@ -53,12 +55,13 @@ void CwGYPExplorerView::OnInitialUpdate()
 	CListView::OnInitialUpdate();
 
 
+	TRACE("view is init update!\n");
 	// TODO:  调用 GetListCtrl() 直接访问 ListView 的列表控件，
 	//  从而可以用项填充 ListView。
 	auto &listCtrl = GetListCtrl();
 
 	listCtrl.SetExtendedStyle(listCtrl.GetExtendedStyle() | LVS_EX_FULLROWSELECT | LVS_EX_GRIDLINES);
-	TRACE("view is init update!\n");
+	listCtrl.InsertColumn(0, _T(""));
 }
 
 void CwGYPExplorerView::OnRButtonUp(UINT /* nFlags */, CPoint point)
@@ -101,4 +104,21 @@ void CwGYPExplorerView::OnStyleChanged(int nStyleType, LPSTYLESTRUCT lpStyleStru
 {
 	//TODO:  添加代码以响应用户对窗口视图样式的更改	
 	CListView::OnStyleChanged(nStyleType,lpStyleStruct);	
+}
+
+void CwGYPExplorerView::UpdateList(gyp::Value *pValue)
+{
+	auto &listCtrl = GetListCtrl();
+
+	listCtrl.DeleteAllItems();
+
+	for (auto iter = pValue->begin(); iter != pValue->end(); ++iter)
+	{
+		auto &node = *iter;
+
+		if (!node.isString()) continue;
+		CString strValue(node.asCString());
+
+		listCtrl.InsertItem(0, strValue);
+	}
 }

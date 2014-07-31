@@ -5,7 +5,9 @@
 #include "stdafx.h"
 #include "wGYPExplorer.h"
 
+#include "MainFrm.h"
 #include "wGYPExplorerDoc.h"
+#include "wGYPExplorerView.h"
 #include "LeftView.h"
 
 #ifdef _DEBUG
@@ -18,7 +20,7 @@
 IMPLEMENT_DYNCREATE(CLeftView, CTreeView)
 
 BEGIN_MESSAGE_MAP(CLeftView, CTreeView)
-//	ON_WM_CREATE()
+	ON_NOTIFY_REFLECT(TVN_SELCHANGED, &CLeftView::OnTvnSelchanged)
 END_MESSAGE_MAP()
 
 
@@ -36,7 +38,7 @@ CLeftView::~CLeftView()
 BOOL CLeftView::PreCreateWindow(CREATESTRUCT& cs)
 {
 	// TODO:  在此处通过修改 CREATESTRUCT cs 来修改窗口类或样式
-	cs.style |= TVS_HASLINES | TVS_LINESATROOT | TVS_HASBUTTONS;
+	cs.style |= TVS_HASLINES | TVS_LINESATROOT | TVS_HASBUTTONS | TVS_SHOWSELALWAYS;
 
 	return CTreeView::PreCreateWindow(cs);
 }
@@ -87,6 +89,19 @@ CwGYPExplorerDoc* CLeftView::GetDocument() // 非调试版本是内联的
 
 
 // CLeftView 消息处理程序
+void CLeftView::OnTvnSelchanged(NMHDR *pNMHDR, LRESULT *pResult)
+{
+	LPNMTREEVIEW pNMTreeView = reinterpret_cast<LPNMTREEVIEW>(pNMHDR);
+	// TODO:  在此添加控件通知处理程序代码
+	auto pMainFrame = reinterpret_cast<CMainFrame*>(GetParentFrame());
+	auto pListView = pMainFrame->GetRightPane();
+
+	pListView->UpdateList(reinterpret_cast<gyp::Value*>(pNMTreeView->itemNew.lParam));
+
+	*pResult = 0;
+}
+
+
 void CLeftView::insertItem(CTreeCtrl& treeCtrl, HTREEITEM hParent, gyp::Value& value)
 {
 	TVINSERTSTRUCT tvInsert;
@@ -168,12 +183,27 @@ void CLeftView::insertTargets(CTreeCtrl& treeCtrl, HTREEITEM hParent, gyp::Value
 
 	for (auto iter = value.begin(); iter != value.end(); ++iter)
 	{
-		CString strName(iter.memberName());
+		auto &node = *iter;
+		CString strName(node["target_name"].asString().c_str());
 
 		tvInsert.item.pszText = strName.GetBuffer();
-		tvInsert.item.lParam = reinterpret_cast<LPARAM>(&*iter);
+		tvInsert.item.lParam = reinterpret_cast<LPARAM>(&node);
 
 		auto hItem = treeCtrl.InsertItem(&tvInsert);
+
+		for (auto subIter = node.begin(); subIter != node.end(); ++subIter)
+		{
+			if (!strcmp("target_name", subIter.memberName())) continue;// 目标名不需要再展示
+
+			CString strName(subIter.memberName());
+
+			auto hSubItem = treeCtrl.InsertItem(TVIF_TEXT | TVIF_PARAM, strName, 0, 0, 0, 0, reinterpret_cast<LPARAM>(&*subIter), hItem, TVI_LAST);
+
+			if (_T("conditions") == strName)
+				insertConditions(treeCtrl, hSubItem, *subIter);
+			else if (_T("variables") == strName)
+				insertItem(treeCtrl, hSubItem, *subIter);
+		}
 	}
 }
 
