@@ -25,6 +25,7 @@ BEGIN_MESSAGE_MAP(CwGYPExplorerView, CListView)
 	ON_WM_STYLECHANGED()
 	ON_WM_CONTEXTMENU()
 	ON_WM_RBUTTONUP()
+	ON_WM_SIZE()
 END_MESSAGE_MAP()
 
 // CwGYPExplorerView 构造/析构
@@ -61,7 +62,14 @@ void CwGYPExplorerView::OnInitialUpdate()
 	auto &listCtrl = GetListCtrl();
 
 	listCtrl.SetExtendedStyle(listCtrl.GetExtendedStyle() | LVS_EX_FULLROWSELECT | LVS_EX_GRIDLINES);
-	listCtrl.InsertColumn(0, _T(""));
+
+	if (!listCtrl.GetHeaderCtrl()->GetItemCount())
+	{
+		CRect rc;
+		listCtrl.GetWindowRect(&rc);
+
+		listCtrl.InsertColumn(0, _T("描述"), LVCFMT_LEFT, rc.Width() - 20);
+	}
 }
 
 void CwGYPExplorerView::OnRButtonUp(UINT /* nFlags */, CPoint point)
@@ -104,6 +112,19 @@ void CwGYPExplorerView::OnStyleChanged(int nStyleType, LPSTYLESTRUCT lpStyleStru
 {
 	//TODO:  添加代码以响应用户对窗口视图样式的更改	
 	CListView::OnStyleChanged(nStyleType,lpStyleStruct);	
+}
+
+void CwGYPExplorerView::OnSize(UINT nType, int cx, int cy)
+{
+	CListView::OnSize(nType, cx, cy);
+
+	// TODO:  在此处添加消息处理程序代码
+	auto &listCtrl = GetListCtrl();
+
+	if (listCtrl.GetHeaderCtrl()->GetItemCount())
+	{
+		listCtrl.SetColumnWidth(0, cx - 20);
+	}
 }
 
 void CwGYPExplorerView::UpdateList(gyp::Value *pValue)
