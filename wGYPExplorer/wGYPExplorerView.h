@@ -25,9 +25,9 @@ public:
 
 // 重写
 public:
-	virtual BOOL PreCreateWindow(CREATESTRUCT& cs);
+	virtual BOOL PreCreateWindow(CREATESTRUCT& cs) override;
 protected:
-	virtual void OnInitialUpdate(); // 构造后第一次调用
+	virtual void OnInitialUpdate() override; // 构造后第一次调用
 
 // 实现
 public:
@@ -38,7 +38,9 @@ public:
 #endif
 
 protected:
-	gyp::Value *m_pValue;
+	gyp::Value *m_pParent;
+
+	void addNewItem();
 
 // 生成的消息映射函数
 protected:
@@ -47,6 +49,8 @@ protected:
 	afx_msg void OnFilePrintPreview();
 	afx_msg void OnRButtonUp(UINT nFlags, CPoint point);
 	afx_msg void OnContextMenu(CWnd* pWnd, CPoint point);
+	afx_msg void OnNMDblclk(NMHDR *pNMHDR, LRESULT *pResult);
+	afx_msg void OnLvnEndlabeledit(NMHDR *pNMHDR, LRESULT *pResult);
 	DECLARE_MESSAGE_MAP()
 };
 

@@ -53,8 +53,11 @@ public:
 		if (length == unknown)
 			length = (unsigned int)strlen(value);
 		char *newString = static_cast<char *>(malloc(length + 1));
-		memcpy(newString, value, length);
-		newString[length] = 0;
+		if (newString)
+		{
+			memcpy(newString, value, length);
+			newString[length] = 0;
+		}
 		return newString;
 	}
 
@@ -1938,8 +1941,7 @@ Reader::readArray(Token &tokenStart)
 		{
 			ok = readToken(token);
 		}
-		bool badTokenType = (token.type_ == tokenArraySeparator  &&
-			token.type_ == tokenArrayEnd);
+		bool badTokenType = (token.type_ != tokenArraySeparator && token.type_ != tokenArrayEnd);
 		if (!ok || badTokenType)
 		{
 			return addErrorAndRecover("Missing ',' or ']' in array declaration",
@@ -1996,7 +1998,7 @@ Reader::decodeDouble(Token &token)
 	const int bufferSize = 32;
 	int count;
 	int length = int(token.end_ - token.start_);
-	if (length <= bufferSize)
+	if (length < bufferSize)
 	{
 		Char buffer[bufferSize];
 		memcpy(buffer, token.start_, length);

@@ -56,7 +56,6 @@ void CwGYPExplorerDoc::Serialize(CArchive& ar)
 	{
 		// TODO:  在此添加加载代码
 		auto pFile = ar.GetFile();
-		m_strFileName = pFile->GetFileName();
 
 		auto nLen = static_cast<UINT>(pFile->GetLength());
 		char *pBuff = new char[nLen];
@@ -65,7 +64,11 @@ void CwGYPExplorerDoc::Serialize(CArchive& ar)
 
 		gyp::Reader reader;
 
-		if (!reader.parse(pBuff, pBuff + nLen, m_Root))
+		if (reader.parse(pBuff, pBuff + nLen, m_Root))
+		{
+			m_strFileName = pFile->GetFileName();
+		}
+		else
 		{
 			CString strMessage("读取gyp文件错误：");
 
@@ -157,10 +160,13 @@ BOOL CwGYPExplorerDoc::OnNewDocument()
 	else
 	{
 		CStringA strDefault;
-		strDefault.LoadString(IDS_FILE_DEFAULT);
+		if (strDefault.LoadString(IDS_FILE_DEFAULT))
+		{
+			gyp::Reader reader;
+			reader.parse(strDefault.GetString(), strDefault.GetString() + strDefault.GetLength(), m_Root);
 
-		gyp::Reader reader;
-		reader.parse(strDefault.GetString(), strDefault.GetString() + strDefault.GetLength(), m_Root);
+			m_strFileName = _T("NewGypFile");
+		}
 	}
 
 	return CDocument::OnNewDocument();
